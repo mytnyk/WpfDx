@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using OlivecDx;
 using OlivecDx.Render;
 
 namespace WpfDx
@@ -29,7 +30,7 @@ namespace WpfDx
             var triangles = new Triangles(null, null, null);
             var scene = new Scene();
             scene.AddObject(triangles);
-            var view = new View(hwnd, w, h);
+            var view = new View(hwnd, 100, 100);
             view.Scene = scene;
             view.Position = new Vector3(0, 0, -50);
             view.Direction = new Vector3(0, 0, 0);
