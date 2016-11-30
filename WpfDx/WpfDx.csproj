@@ -73,6 +73,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\Mesh.cs" />
+    <Compile Include="Model\MeshHelper.cs" />
+    <Compile Include="Model\MeshLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -105,6 +108,10 @@
       <Project>{ff131615-ae7c-49b1-b0a8-6e7726848c00}</Project>
       <Name>OlivecDx</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Data\simple_component.txt" />
+    <Resource Include="Data\simple_shell.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

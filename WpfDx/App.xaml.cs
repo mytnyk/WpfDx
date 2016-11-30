@@ -19,6 +19,7 @@ namespace WpfDx
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+
             var main_view = new MainView();
             //main_view.Closing += (o, ce) => { main_view_model.Disconnect(); };
             //main_view.DataContext = main_view_model;
@@ -28,14 +29,19 @@ namespace WpfDx
             IntPtr hwnd = new WindowInteropHelper(main_view).Handle;
 
             var triangles = new Triangles(null, null, null);
+            var obj = new SceneObject(triangles, new Matrix4x4());
             var scene = new Scene();
-            scene.AddObject(triangles);
-            var view = new View(hwnd, 100, 100);
-            view.Scene = scene;
-            view.Position = new Vector3(0, 0, -50);
-            view.Direction = new Vector3(0, 0, 0);
-            view.Up = Vector3.UnitY;
-            view.Run();
+            scene.AddObject(obj);
+      
+          var view = new View(hwnd, 100, 100)
+          {
+            Scene = scene,
+            ViewMatrix = new Matrix4x4()
+          };
+          //view.Position = new Vector3(0, 0, -50);
+            //view.Direction = new Vector3(0, 0, 0);
+            //view.Up = Vector3.UnitY;
+      view.Run();
         }
     }
 }
