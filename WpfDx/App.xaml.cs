@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Interop;
 using OlivecDx;
 using OlivecDx.Render;
+using WpfDx.Model;
 
 namespace WpfDx
 {
@@ -28,7 +29,10 @@ namespace WpfDx
 
             IntPtr hwnd = new WindowInteropHelper(main_view).Handle;
 
-            var triangles = new Triangles(null, null, null);
+            var loader = new MeshLoader();
+            var m = new Mesh(loader.Load("data/simple_shell.txt"));
+
+            var triangles = new Triangles(m.Vertices, m.VertexNormals, m.Faces);
             var obj = new SceneObject(triangles, new Matrix4x4());
             var scene = new Scene();
             scene.AddObject(obj);

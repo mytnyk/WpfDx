@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Numerics;
 
-namespace DemoAnimat.Model
+namespace WpfDx.Model
 {
     internal class Mesh
     {

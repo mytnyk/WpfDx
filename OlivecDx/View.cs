@@ -16,6 +16,7 @@ using SharpDX.Mathematics.Interop;
 using SharpDX.Windows;
 using Device = SharpDX.Direct3D11.Device;
 using Resource = SharpDX.Direct3D11.Resource;
+using System.Threading;
 
 namespace OlivecDx
 {
@@ -65,14 +66,25 @@ namespace OlivecDx
       var render_view = new RenderTargetView(device, back_buffer);
 
       var triangles_layout = new TrianglesLayout(device);
-      //_shell.InitBuffers(device, layout);
+            //_shell.InitBuffers(device, layout);
 
-      RenderLoop.Run(new ApplicationContext(), () =>
+        //using (var renderLoop = new RenderLoop())
+        //{
+            while (true)
+            {
+                Thread.Sleep(100);
+                    _context.ClearRenderTargetView(render_view, Colors.LightBlue);
+                    //_context.ClearDepthStencilView(depth_stencil_view, DepthStencilClearFlags.Depth, 1.0f, 0);
+                    swap_chain.Present(0, PresentFlags.None);
+                }
+        //}
+        /*
+            RenderLoop.Run(new ApplicationContext(), () =>
       {
         _context.ClearRenderTargetView(render_view, Colors.LightBlue);
         //_context.ClearDepthStencilView(depth_stencil_view, DepthStencilClearFlags.Depth, 1.0f, 0);
         swap_chain.Present(0, PresentFlags.None);
-      });
+      });*/
     }
   }
 }
