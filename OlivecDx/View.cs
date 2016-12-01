@@ -3,62 +3,55 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using OlivecDx.Render;
 using SharpDX;
-using SharpDX.Direct3D;
 using SharpDX.Direct3D10;
 using SharpDX.DXGI;
 using SharpDX.Direct3D9;
-using Format = SharpDX.DXGI.Format;
-using Usage = SharpDX.DXGI.Usage;
 
 namespace OlivecDx
 {
   public class View
   {
-    private readonly IntPtr _hwnd;
     private readonly int _width;
     private readonly int _height;
-    //private DeviceContext _context;
+
     private readonly Texture2D _back_buffer;
     private readonly SharpDX.Direct3D9.DeviceEx _device9;
     private readonly SharpDX.Direct3D10.Device1 _device10;
     private readonly RenderTargetView _render_view;
-    private Texture _texture;
+    private readonly Texture _texture;
     [DllImport("user32.dll", SetLastError = false)]
     static extern IntPtr GetDesktopWindow();
 
     private Color4 _bg_color = Colors.Green;
 
-    public View(IntPtr hwnd, int width, int height)
+    public View(int width, int height)
     {
-      var direct3D = new Direct3DEx();
-      PresentParameters presentparams = new PresentParameters();
-      presentparams.Windowed = true;
-      presentparams.SwapEffect = SharpDX.Direct3D9.SwapEffect.Discard;
-      presentparams.DeviceWindowHandle = GetDesktopWindow();
-      presentparams.PresentationInterval = PresentInterval.Default;
+      var presentparams = new PresentParameters
+      {
+        Windowed = true,
+        SwapEffect = SharpDX.Direct3D9.SwapEffect.Discard,
+        DeviceWindowHandle = GetDesktopWindow(),
+        PresentationInterval = PresentInterval.Default,
+      };
 
       _device9 = new SharpDX.Direct3D9.DeviceEx(
-        direct3D, 0, DeviceType.Hardware, IntPtr.Zero, 
+        new Direct3DEx(), 0, DeviceType.Hardware, IntPtr.Zero, 
         CreateFlags.HardwareVertexProcessing | CreateFlags.Multithreaded | CreateFlags.FpuPreserve,
         presentparams);
 
-      _hwnd = hwnd;
       _width = width;
       _height = height;
 
       _device10 = new SharpDX.Direct3D10.Device1(
         SharpDX.Direct3D10.DriverType.Hardware, DeviceCreationFlags.BgraSupport,
         SharpDX.Direct3D10.FeatureLevel.Level_10_0);
-      //var device11 = new SharpDX.Direct3D11.Device(DriverType.Hardware, DeviceCreationFlags.BgraSupport);
-      //var device11 = DeviceUtil.Create11(DeviceCreationFlags.BgraSupport);
-      //_context = device11.ImmediateContext;
 
-      var texture2_d_description = new Texture2DDescription()
+      var texture2_d_description = new Texture2DDescription
       {
         ArraySize = 1,
         BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
         CpuAccessFlags = CpuAccessFlags.None,
-        Format = Format.B8G8R8A8_UNorm,
+        Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm,
         Width = width,
         Height = height,
         MipLevels = 1,
@@ -72,7 +65,7 @@ namespace OlivecDx
 
       SharpDX.Direct3D9.Format format = TranslateFormat(_back_buffer);
       if (format == SharpDX.Direct3D9.Format.Unknown)
-        throw new ArgumentException("Texture format is not compatible with OpenSharedResource");
+        throw new ArgumentException("texture format is not compatible with OpenSharedResource");
       IntPtr handle = GetSharedHandle(_back_buffer);
       if (handle == IntPtr.Zero)
         throw new ArgumentNullException("Handle");
@@ -80,18 +73,29 @@ namespace OlivecDx
       _texture = new Texture(_device9, _back_buffer.Description.Width, 
         _back_buffer.Description.Height, 1, SharpDX.Direct3D9.Usage.RenderTarget, format, Pool.Default, ref handle);
 
-      //_context.ClearRenderTargetView(render_view, Colors.LightBlue);
+      var eye = new System.Numerics.Vector3(0, 0, -50);
+      ViewTransform = Matrix4x4.CreateLookAt(eye, System.Numerics.Vector3.Zero, System.Numerics.Vector3.UnitY);
+      ProjectionTransform = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4.0f, _width / (float)_height, 0.1f, 100);
     }
-    private IntPtr GetSharedHandle(SharpDX.Direct3D10.Texture2D Texture)
+    private IntPtr GetSharedHandle(SharpDX.Direct3D10.Texture2D texture)
     {
-      SharpDX.DXGI.Resource resource = Texture.QueryInterface<SharpDX.DXGI.Resource>();
+      SharpDX.DXGI.Resource resource = texture.QueryInterface<SharpDX.DXGI.Resource>();
       IntPtr result = resource.SharedHandle;
       resource.Dispose();
       return result;
     }
 
     public Scene Scene { get; set; }
-    public Matrix4x4 ViewMatrix { get; set; }
+    //public Matrix4x4 ViewMatrix { get; set; }
+
+    public void InitBuffers()
+    {
+      var layout = new TrianglesLayout(_device10);
+      foreach (var scene_object in Scene.ListOfObjects)
+      {
+        scene_object.InitBuffers(_device10, layout);
+      }
+    }
 
     private static SharpDX.Direct3D9.Format TranslateFormat(SharpDX.Direct3D10.Texture2D Texture)
     {
@@ -106,6 +110,8 @@ namespace OlivecDx
         case SharpDX.DXGI.Format.B8G8R8A8_UNorm:
           return SharpDX.Direct3D9.Format.A8R8G8B8;
 
+        case SharpDX.DXGI.Format.R8G8B8A8_UNorm:
+          return SharpDX.Direct3D9.Format.A8R8G8B8;
         default:
           return SharpDX.Direct3D9.Format.Unknown;
       }
@@ -119,6 +125,12 @@ namespace OlivecDx
     public void Render()
     {
       _device10.ClearRenderTargetView(_render_view, _bg_color);
+
+      foreach (var scene_object in Scene.ListOfObjects)
+      {
+        scene_object.Render(_device10, ViewTransform, ProjectionTransform);
+      }
+
       _device10.Flush();
     }
 
@@ -126,5 +138,8 @@ namespace OlivecDx
     {
       _bg_color = _bg_color != Colors.LightBlue ? Colors.LightBlue : Colors.Green;
     }
+
+    public Matrix4x4 ViewTransform { get; set; }
+    public Matrix4x4 ProjectionTransform { get; set; }
   }
 }

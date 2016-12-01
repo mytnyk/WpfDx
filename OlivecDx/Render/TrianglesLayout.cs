@@ -5,7 +5,7 @@ using Device = SharpDX.Direct3D10.Device;
 
 namespace OlivecDx.Render
 {
-    internal class TrianglesLayout
+    public class TrianglesLayout
     {
         private readonly ShaderSignature _input_signature;
         public VertexShader VertexShader { get; }

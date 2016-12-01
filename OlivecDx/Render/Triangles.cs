@@ -52,34 +52,35 @@ namespace OlivecDx.Render
             }).ToArray();
         }
 
-        private void InitBuffers(Device device, TrianglesLayout layout)
+        public void InitBuffers(Device device, TrianglesLayout layout)
         {
             _layout = layout;
             _vertices_buffer = Buffer.Create(device, BindFlags.VertexBuffer, _data);
             _vertex_binding = new VertexBufferBinding(_vertices_buffer, Utilities.SizeOf<TrianglesVertexShaderStruct>(), 0);
             _indices_buffer = Buffer.Create(device, BindFlags.IndexBuffer, _faces);
 
-            //_triangles_constants_buffer = new Buffer(device, Utilities.SizeOf<TrianglesConstants>(), ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
+            _triangles_constants_buffer = new Buffer(device,
+              Utilities.SizeOf<TrianglesConstants>(), ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None);
         }
-    /*
-        public void Render(DeviceContext context, 
+
+        public void Render(Device device, 
             Matrix4x4 view, Matrix4x4 projection, Matrix4x4 position)
         {
-            context.VertexShader.SetConstantBuffer(0, _triangles_constants_buffer);
+            device.VertexShader.SetConstantBuffer(0, _triangles_constants_buffer);
             _triangles_constants.View = view;
             _triangles_constants.Projection = projection;
             _triangles_constants.Position = position;
             _triangles_constants.Color = Color;
-            context.UpdateSubresource(ref _triangles_constants, _triangles_constants_buffer);
+            device.UpdateSubresource(ref _triangles_constants, _triangles_constants_buffer);
 
-            context.InputAssembler.InputLayout = _layout.Layout;
-            context.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            context.VertexShader.Set(_layout.VertexShader);
-            context.PixelShader.Set(_layout.PixelShader);
-            context.InputAssembler.SetVertexBuffers(0, _vertex_binding);
-            context.InputAssembler.SetIndexBuffer(_indices_buffer, Format.R32_UInt, 0);
-            context.DrawIndexed(_faces.Length, 0, 0);
-        }*/
+            device.InputAssembler.InputLayout = _layout.Layout;
+            device.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+            device.VertexShader.Set(_layout.VertexShader);
+            device.PixelShader.Set(_layout.PixelShader);
+            device.InputAssembler.SetVertexBuffers(0, _vertex_binding);
+            device.InputAssembler.SetIndexBuffer(_indices_buffer, Format.R32_UInt, 0);
+            device.DrawIndexed(_faces.Length, 0, 0);
+        }
         public void Dispose()
         {
             _vertices_buffer.Dispose();

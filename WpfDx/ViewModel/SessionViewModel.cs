@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Numerics;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using OlivecDx;
+using OlivecDx.Render;
+using WpfDx.Model;
 
 namespace WpfDx.ViewModel
 {
@@ -11,7 +15,28 @@ namespace WpfDx.ViewModel
     private readonly OlivecDx.View _view;
     public SessionViewModel()
     {
-      _view = new OlivecDx.View(IntPtr.Zero, 10, 10);
+
+      var loader = new MeshLoader();
+      var m = new Mesh(loader.Load("data/simple_component.txt"));
+
+      var triangles = new Triangles(m.Vertices, m.VertexNormals, m.Faces);
+      var obj = new SceneObject(triangles, new Matrix4x4());
+      var scene = new Scene();
+      scene.AddObject(obj);
+
+
+    //_view.Position = new Vector3(0, 0, -50);
+//      view.Direction = new Vector3(0, 0, 0);
+      //view.Up = Vector3.UnitY;
+
+      _view = new OlivecDx.View(100, 100)
+      {
+        Scene = scene,
+        //ViewMatrix = new Matrix4x4()
+      };
+
+      _view.InitBuffers();
+
       CompositionTarget.Rendering += OnRendering;
       Surface = new D3DImage();
       Surface.IsFrontBufferAvailableChanged += Surface_IsFrontBufferAvailableChanged;

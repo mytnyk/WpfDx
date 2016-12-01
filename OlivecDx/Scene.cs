@@ -9,10 +9,10 @@ namespace OlivecDx
 {
   public class Scene
   {
-    private readonly List<SceneObject> _list_of_objects = new List<SceneObject>();
+    public readonly List<SceneObject> ListOfObjects = new List<SceneObject>();
     public void AddObject(SceneObject obj)
     {
-      _list_of_objects.Add(obj);
+      ListOfObjects.Add(obj);
     }
   }
 }
