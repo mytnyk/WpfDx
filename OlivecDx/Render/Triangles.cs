@@ -3,11 +3,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using SharpDX;
 using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
 using SharpDX.DXGI;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using Device = SharpDX.Direct3D11.Device;
+using Buffer = SharpDX.Direct3D10.Buffer;
+using Device = SharpDX.Direct3D10.Device;
 using System.Numerics;
+using Vector3 = System.Numerics.Vector3;
+using Vector4 = System.Numerics.Vector4;
+using SharpDX.Direct3D10;
 
 namespace OlivecDx.Render
 {
@@ -57,8 +59,9 @@ namespace OlivecDx.Render
             _vertex_binding = new VertexBufferBinding(_vertices_buffer, Utilities.SizeOf<TrianglesVertexShaderStruct>(), 0);
             _indices_buffer = Buffer.Create(device, BindFlags.IndexBuffer, _faces);
 
-            _triangles_constants_buffer = new Buffer(device, Utilities.SizeOf<TrianglesConstants>(), ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
+            //_triangles_constants_buffer = new Buffer(device, Utilities.SizeOf<TrianglesConstants>(), ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
         }
+    /*
         public void Render(DeviceContext context, 
             Matrix4x4 view, Matrix4x4 projection, Matrix4x4 position)
         {
@@ -76,7 +79,7 @@ namespace OlivecDx.Render
             context.InputAssembler.SetVertexBuffers(0, _vertex_binding);
             context.InputAssembler.SetIndexBuffer(_indices_buffer, Format.R32_UInt, 0);
             context.DrawIndexed(_faces.Length, 0, 0);
-        }
+        }*/
         public void Dispose()
         {
             _vertices_buffer.Dispose();

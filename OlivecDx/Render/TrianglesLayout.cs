@@ -1,7 +1,7 @@
 ﻿using SharpDX.D3DCompiler;
-using SharpDX.Direct3D11;
+using SharpDX.Direct3D10;
 using SharpDX.DXGI;
-using Device = SharpDX.Direct3D11.Device;
+using Device = SharpDX.Direct3D10.Device;
 
 namespace OlivecDx.Render
 {

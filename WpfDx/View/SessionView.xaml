@@ -1,0 +1,12 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:viewModel="clr-namespace:WpfDx.ViewModel">
+  <DataTemplate DataType="{x:Type viewModel:SessionViewModel}">
+    <Grid>
+      <StackPanel>
+        <Image Source="{Binding Surface}"/>
+        <Button Content="Color" Command="{Binding Path=ChangeColorCmd}" />
+      </StackPanel>
+    </Grid>
+  </DataTemplate>
+</ResourceDictionary>
