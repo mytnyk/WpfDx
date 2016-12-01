@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using OlivecDx.Render;
 using SharpDX;
@@ -18,11 +17,12 @@ namespace OlivecDx
     private readonly SharpDX.Direct3D9.DeviceEx _device9;
     private readonly SharpDX.Direct3D10.Device1 _device10;
     private readonly RenderTargetView _render_view;
+    private readonly DepthStencilView _depth_stencil_view;
     private readonly Texture _texture;
     [DllImport("user32.dll", SetLastError = false)]
     static extern IntPtr GetDesktopWindow();
 
-    private Color4 _bg_color = Colors.Green;
+    private Color4 _bg_color = Color.LightBlue;
 
     public View(int width, int height)
     {
@@ -73,9 +73,54 @@ namespace OlivecDx
       _texture = new Texture(_device9, _back_buffer.Description.Width, 
         _back_buffer.Description.Height, 1, SharpDX.Direct3D9.Usage.RenderTarget, format, Pool.Default, ref handle);
 
-      var eye = new System.Numerics.Vector3(0, 0, -50);
-      ViewTransform = Matrix4x4.CreateLookAt(eye, System.Numerics.Vector3.Zero, System.Numerics.Vector3.UnitY);
-      ProjectionTransform = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4.0f, _width / (float)_height, 0.1f, 100);
+      var eye = new Vector3(0, 0, -50);
+      ViewTransform = Matrix.LookAtLH(eye, Vector3.Zero, Vector3.UnitY);
+      ProjectionTransform = Matrix.PerspectiveFovLH((float)Math.PI / 4.0f, _width / (float)_height, 0.1f, 100);
+
+      //ViewTransform = Matrix4x4.Identity;
+      //ProjectionTransform = Matrix4x4.Identity;
+
+      var rasterizer_state_desc = new RasterizerStateDescription()
+      {
+        CullMode = CullMode.None,
+        FillMode = SharpDX.Direct3D10.FillMode.Solid,//FillMode.Wireframe,
+        IsFrontCounterClockwise = false,
+        DepthBias = 0,
+        DepthBiasClamp = 0,
+        SlopeScaledDepthBias = 0,
+        IsDepthClipEnabled = true,
+        IsScissorEnabled = false,
+        IsMultisampleEnabled = true,
+        IsAntialiasedLineEnabled = true
+      };
+      _device10.Rasterizer.State = new RasterizerState(_device10, rasterizer_state_desc);
+
+      _device10.Rasterizer.SetViewports(new Viewport(0, 0,
+          _back_buffer.Description.Width, _back_buffer.Description.Height, 0.0f, 1.0f));
+
+      var texture2_d_description_depth = new Texture2DDescription()
+      {
+        ArraySize = 1,
+        BindFlags = BindFlags.DepthStencil,
+        CpuAccessFlags = CpuAccessFlags.None,
+        Format = SharpDX.DXGI.Format.R32_Typeless,
+        Width = _width,
+        Height = _height,
+        MipLevels = 1,
+        OptionFlags = ResourceOptionFlags.Shared,
+        SampleDescription = new SampleDescription(1, 0),
+        Usage = ResourceUsage.Default
+      };
+      var depth_texture = new Texture2D(_device10, texture2_d_description_depth);
+      var depth_view_desc = new DepthStencilViewDescription()
+      {
+        Dimension = DepthStencilViewDimension.Texture2D,
+        Format = SharpDX.DXGI.Format.D32_Float,
+      };
+
+      _depth_stencil_view = new DepthStencilView(_device10, depth_texture, depth_view_desc);
+
+      _device10.OutputMerger.SetTargets(_depth_stencil_view, _render_view);
     }
     private IntPtr GetSharedHandle(SharpDX.Direct3D10.Texture2D texture)
     {
@@ -125,7 +170,7 @@ namespace OlivecDx
     public void Render()
     {
       _device10.ClearRenderTargetView(_render_view, _bg_color);
-
+      _device10.ClearDepthStencilView(_depth_stencil_view, DepthStencilClearFlags.Depth, 1.0f, 0);
       foreach (var scene_object in Scene.ListOfObjects)
       {
         scene_object.Render(_device10, ViewTransform, ProjectionTransform);
@@ -136,10 +181,10 @@ namespace OlivecDx
 
     public void SetNewBgColor()
     {
-      _bg_color = _bg_color != Colors.LightBlue ? Colors.LightBlue : Colors.Green;
+      _bg_color = _bg_color != Color.LightBlue ? Color.LightBlue : Color.Green;
     }
 
-    public Matrix4x4 ViewTransform { get; set; }
-    public Matrix4x4 ProjectionTransform { get; set; }
+    public Matrix ViewTransform { get; set; }
+    public Matrix ProjectionTransform { get; set; }
   }
 }
