@@ -77,13 +77,10 @@ namespace OlivecDx
       ViewTransform = Matrix.LookAtLH(eye, Vector3.Zero, Vector3.UnitY);
       ProjectionTransform = Matrix.PerspectiveFovLH((float)Math.PI / 4.0f, _width / (float)_height, 0.1f, 100);
 
-      //ViewTransform = Matrix4x4.Identity;
-      //ProjectionTransform = Matrix4x4.Identity;
-
       var rasterizer_state_desc = new RasterizerStateDescription()
       {
         CullMode = CullMode.None,
-        FillMode = SharpDX.Direct3D10.FillMode.Solid,//FillMode.Wireframe,
+        FillMode = SharpDX.Direct3D10.FillMode.Solid,
         IsFrontCounterClockwise = false,
         DepthBias = 0,
         DepthBiasClamp = 0,
@@ -122,6 +119,12 @@ namespace OlivecDx
 
       _device10.OutputMerger.SetTargets(_depth_stencil_view, _render_view);
     }
+
+    public void TestRotate()
+    {
+      ViewTransform = Matrix.RotationY(0.001f) * ViewTransform;
+    }
+
     private IntPtr GetSharedHandle(SharpDX.Direct3D10.Texture2D texture)
     {
       SharpDX.DXGI.Resource resource = texture.QueryInterface<SharpDX.DXGI.Resource>();
@@ -184,7 +187,7 @@ namespace OlivecDx
       _bg_color = _bg_color != Color.LightBlue ? Color.LightBlue : Color.Green;
     }
 
-    public Matrix ViewTransform { get; set; }
-    public Matrix ProjectionTransform { get; set; }
+    private Matrix ViewTransform { get; set; }
+    private Matrix ProjectionTransform { get; set; }
   }
 }

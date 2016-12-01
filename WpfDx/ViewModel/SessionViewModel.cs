@@ -7,6 +7,7 @@ using System.Windows.Media;
 using OlivecDx;
 using OlivecDx.Render;
 using WpfDx.Model;
+using System.Threading;
 
 namespace WpfDx.ViewModel
 {
@@ -46,6 +47,16 @@ namespace WpfDx.ViewModel
       Surface.SetBackBuffer(D3DResourceType.IDirect3DSurface9, back_buffer);
       Surface.AddDirtyRect(new Int32Rect(0, 0, Surface.PixelWidth, Surface.PixelHeight));
       Surface.Unlock();
+
+      var shell_rotation_thread = new Thread(() =>
+      {
+        while (true)
+        {
+          _view.TestRotate();
+          Thread.Sleep(10);
+        }
+      });
+      shell_rotation_thread.Start();
     }
 
     private void Surface_IsFrontBufferAvailableChanged(object sender, DependencyPropertyChangedEventArgs e)
