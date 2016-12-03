@@ -113,6 +113,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Map3dConstructor\Map3dConstructor.csproj">
+      <Project>{040b9f8a-a2e4-49ff-a749-7c9c78499594}</Project>
+      <Name>Map3dConstructor</Name>
+    </ProjectReference>
     <ProjectReference Include="..\OlivecDx\OlivecDx.csproj">
       <Project>{ff131615-ae7c-49b1-b0a8-6e7726848c00}</Project>
       <Name>OlivecDx</Name>

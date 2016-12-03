@@ -5,6 +5,7 @@ using SharpDX;
 using SharpDX.Direct3D10;
 using SharpDX.DXGI;
 using SharpDX.Direct3D9;
+//using System.Numerics;
 
 namespace OlivecDx
 {
@@ -73,8 +74,6 @@ namespace OlivecDx
       _texture = new Texture(_device9, _back_buffer.Description.Width, 
         _back_buffer.Description.Height, 1, SharpDX.Direct3D9.Usage.RenderTarget, format, Pool.Default, ref handle);
 
-      var eye = new Vector3(0, 0, -50);
-      ViewTransform = Matrix.LookAtLH(eye, Vector3.Zero, Vector3.UnitY);
       ProjectionTransform = Matrix.PerspectiveFovLH((float)Math.PI / 4.0f, _width / (float)_height, 0.1f, 100);
 
       var rasterizer_state_desc = new RasterizerStateDescription()
@@ -122,7 +121,7 @@ namespace OlivecDx
 
     public void TestRotate()
     {
-      ViewTransform = Matrix.RotationY(0.001f) * ViewTransform;
+      Direction += new System.Numerics.Vector3(0, 0.001f, 0);// Matrix.RotationZ(0.001f) * Direction;
     }
 
     private IntPtr GetSharedHandle(SharpDX.Direct3D10.Texture2D texture)
@@ -172,6 +171,9 @@ namespace OlivecDx
 
     public void Render()
     {
+      Vector3 position = new Vector3(Position.X, Position.Y, Position.Z);
+      Vector3 direction = new Vector3(Direction.X, Direction.Y, Direction.Z);
+      ViewTransform = Matrix.LookAtLH(position, position + direction, Vector3.UnitZ);
       _device10.ClearRenderTargetView(_render_view, _bg_color);
       _device10.ClearDepthStencilView(_depth_stencil_view, DepthStencilClearFlags.Depth, 1.0f, 0);
       foreach (var scene_object in Scene.ListOfObjects)
@@ -189,5 +191,7 @@ namespace OlivecDx
 
     private Matrix ViewTransform { get; set; }
     private Matrix ProjectionTransform { get; set; }
+    public System.Numerics.Vector3 Position { get; set; }
+    public System.Numerics.Vector3 Direction { get; set; }
   }
 }
