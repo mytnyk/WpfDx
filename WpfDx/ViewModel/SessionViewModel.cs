@@ -5,12 +5,12 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using OlivecDx;
-using OlivecDx.Render;
-using WpfDx.Model;
 using System.Threading;
 using Map3dConstructor;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using OlivecDx.Tex;
 
 namespace WpfDx.ViewModel
 {
@@ -19,32 +19,39 @@ namespace WpfDx.ViewModel
     private readonly OlivecDx.View _view;
     public SessionViewModel()
     {
-/*
-      var loader = new MeshLoader();
-      var m = new Mesh(loader.Load("data/opened_shell.txt"));
-      var triangles = new Triangles(m.Vertices, m.VertexNormals, m.Faces);
-      var obj = new SceneObject(triangles, Matrix4x4.Identity);
-      var scene = new Scene();
-      scene.AddObject(obj);*/
 
       List<Triangle> walls = new List<Triangle>();
       List<Triangle> floor = new List<Triangle>();
 
       ElementType[] map = { ElementType.Road, ElementType.Wall, ElementType.Road, ElementType.Road };
-      var map2d = new Map2d(map, 2, 2);
+      var map2d = new Map3DConstructor(map, 2, 2);
       map2d.Generate(walls, floor, 8);
 
-      var wall_mesh = new Mesh(walls.SelectMany(t => new []{t.A, t.B, t.C}).ToArray());
-      var wall_triangles = new Triangles(wall_mesh.Vertices, wall_mesh.VertexNormals, wall_mesh.Faces);
+      var wall_triangles = new Triangles(
+        walls.SelectMany(t => new[] { t.A, t.B, t.C }),
+        walls.SelectMany(t => new[] { t.At, t.Bt, t.Ct}),
+        File.ReadAllBytes("Data/GeneticaMortarlessBlocks.jpg"));
       var wall_obj = new SceneObject(wall_triangles, Matrix4x4.Identity);
 
-      var floor_mesh = new Mesh(floor.SelectMany(t => new[] { t.A, t.B, t.C }).ToArray());
-      var floor_triangles = new Triangles(floor_mesh.Vertices, floor_mesh.VertexNormals, floor_mesh.Faces);
+      var floor_triangles = new Triangles(
+        floor.SelectMany(t => new[] { t.A, t.B, t.C }),
+        floor.SelectMany(t => new[] { t.At, t.Bt, t.Ct }),
+        File.ReadAllBytes("Data/mud.bmp"));
       var floor_obj = new SceneObject(floor_triangles, Matrix4x4.Identity);
+
+
+      var gold = Map3DConstructor.GenerateWall(1*8, 2*8, 1*8, 1*8, 8);
+      var gold_triangles = new Triangles(
+        gold.SelectMany(t => new[] { t.A, t.B, t.C }),
+        gold.SelectMany(t => new[] { t.At, t.Bt, t.Ct}),
+        File.ReadAllBytes("Data/gold1.png"));
+        //File.ReadAllBytes("Data/mud.bmp"));
+      var gold_obj = new SceneObject(gold_triangles, Matrix4x4.Identity);
 
       var scene = new Scene();
       scene.AddObject(wall_obj);
       scene.AddObject(floor_obj);
+      //scene.AddObject(gold_obj);
 
       _view = new OlivecDx.View(600, 600)
       {
@@ -56,17 +63,16 @@ namespace WpfDx.ViewModel
 
       CompositionTarget.Rendering += OnRendering;
       Surface = new D3DImage();
-      Surface.IsFrontBufferAvailableChanged += Surface_IsFrontBufferAvailableChanged;
 
-      IntPtr back_buffer = _view.GetBackBufferPtr();
+      IntPtr backBuffer = _view.GetBackBufferPtr();
       Surface.Lock();
-      Surface.SetBackBuffer(D3DResourceType.IDirect3DSurface9, back_buffer);
+      Surface.SetBackBuffer(D3DResourceType.IDirect3DSurface9, backBuffer);
       Surface.Unlock();
 
       _view.Position = new Vector3(4, 4, 4);
       _view.Direction = new Vector3(1, 0, 0);
 
-      var shell_rotation_thread = new Thread(() =>
+      var shellRotationThread = new Thread(() =>
       {
         while (true)
         {
@@ -74,12 +80,7 @@ namespace WpfDx.ViewModel
           Thread.Sleep(10);
         }
       });
-      shell_rotation_thread.Start();
-    }
-
-    private void Surface_IsFrontBufferAvailableChanged(object sender, DependencyPropertyChangedEventArgs e)
-    {
-      //throw new NotImplementedException();
+      shellRotationThread.Start();
     }
 
     private void OnRendering(object sender, EventArgs e)
