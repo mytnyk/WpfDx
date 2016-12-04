@@ -26,12 +26,12 @@ namespace OlivecDx
       _position = _Convert(position);
     }
 
-    public void InitBuffers(Device1 device10)
+    internal void InitBuffers(Device1 device10)
     {
       _triangles.InitBuffers(device10);
     }
 
-    public void Render(Device1 device10, Matrix viewTransform, Matrix projectionTransform)
+    internal void Render(Device1 device10, Matrix viewTransform, Matrix projectionTransform)
     {
       _triangles.Render(device10, viewTransform, projectionTransform, _position);
     }

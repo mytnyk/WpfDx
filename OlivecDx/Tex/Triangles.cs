@@ -50,7 +50,7 @@ namespace OlivecDx.Tex
       _textureBuffer = textureBuffer;
     }
 
-    public void InitBuffers(Device device)
+    internal void InitBuffers(Device device)
     {
       _layout = new TrianglesLayout(device);
       _verticesBuffer = Buffer.Create(device, BindFlags.VertexBuffer, _data);
@@ -79,7 +79,7 @@ namespace OlivecDx.Tex
       });
     }
 
-    public void Render(Device device,
+    internal void Render(Device device,
         Matrix view, Matrix projection, Matrix position)
     {
       device.VertexShader.SetConstantBuffer(0, _trianglesConstantsBuffer);
